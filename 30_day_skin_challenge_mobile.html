@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>30-Day Skin & Face Challenge — Mobile Tracker</title>
+  <style>
+    :root {
+      --bg: #071226;
+      --card: #081426;
+      --muted: #9aa4b2;
+      --accent: #ffd166;
+      --good: #16a34a;
+      --bad: #ef4444;
+      --glass: rgba(255, 255, 255, 0.03);
+      --radius: 16px;
+      --gap: 14px;
+      --safe-touch: 56px;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: linear-gradient(180deg, #071226 0%, #071830 100%);
+      color: #e6eef8;
+      -webkit-font-smoothing: antialiased
+    }
+
+    .wrap {
+      max-width: 520px;
+      margin: 18px auto;
+      padding: 16px
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .topbar {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    /* player toggle */
+    .player-toggle {
+      display: inline-flex;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      padding: 4px
+    }
+
+    .player-toggle .pill {
+      min-width: 104px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font-weight: 700
+    }
+
+    .player-toggle .pill:hover {
+      background: rgba(255, 255, 255, 0.06)
+    }
+
+    .player-toggle .pill.active {
+      background: var(--accent);
+      color: #0b1020;
+      border-color: rgba(255, 209, 102, 0.6)
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+      padding: 14px;
+      border-radius: var(--radius);
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08)
+    }
+
+    .day-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px
+    }
+
+    .day-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start
+    }
+
+    .day-number {
+      font-weight: 800;
+      font-size: 20px
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px
+    }
+
+    .btn {
+      min-width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: var(--card);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      cursor: pointer;
+      color: #e6eef8;
+      transition: background-color .2s, border-color .2s, color .2s, transform .02s
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12)
+    }
+
+    .btn:active {
+      transform: translateY(1px)
+    }
+
+    .btn:focus-visible {
+      border-color: rgba(255, 209, 102, 0.6)
+    }
+
+    /* specific button accents */
+    #resetBtn {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--bad);
+      border-color: rgba(239, 68, 68, 0.28)
+    }
+
+    #resetBtn:hover {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.38)
+    }
+
+    #prevBtn,
+    #nextBtn {
+      background: rgba(255, 255, 255, 0.02)
+    }
+
+    #prevBtn:hover,
+    #nextBtn:hover {
+      background: rgba(255, 255, 255, 0.06)
+    }
+
+    /* progress ring area */
+    .progress-wrap {
+      display: flex;
+      gap: 12px;
+      align-items: center
+    }
+
+    .progress {
+      width: 84px;
+      height: 84px;
+      display: grid;
+      place-items: center
+    }
+
+    .progress svg {
+      transform: rotate(-90deg)
+    }
+
+    .progress-value {
+      font-weight: 800
+    }
+
+    /* tasks list */
+    .tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: border-color .2s, background-color .2s
+    }
+
+    .task:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.03)
+    }
+
+    .task .left {
+      flex: 1
+    }
+
+    .task .name {
+      font-weight: 700
+    }
+
+    .task .meta {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .toggle {
+      width: var(--safe-touch);
+      height: var(--safe-touch);
+      min-width: var(--safe-touch);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: transparent;
+      transition: border-color .2s, background-color .2s
+    }
+
+    .toggle.blank {
+      color: var(--muted)
+    }
+
+    .toggle.tick {
+      background: rgba(22, 163, 74, 0.12);
+      color: var(--good);
+      border-color: rgba(22, 163, 74, 0.38)
+    }
+
+    .toggle.cross {
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--bad);
+      border-color: rgba(239, 68, 68, 0.32)
+    }
+
+    .toggle:hover {
+      border-color: rgba(255, 255, 255, 0.18)
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 14px
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .scores {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px
+    }
+
+    .score-card {
+      background: transparent;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08)
+    }
+
+    /* big mobile-friendly touch area for previous/next swipes */
+    .swipe-area {
+      touch-action: pan-y
+    }
+
+    @media(min-width:600px) {
+      .wrap {
+        max-width: 520px
+      }
+    }
+
+    /* accessibility focus */
+    .btn:focus,
+    .toggle:focus,
+    .player-toggle .pill:focus {
+      outline: 2px solid rgba(255, 209, 102, 0.14);
+      outline-offset: 2px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+
+      <div class="topbar" aria-label="Choose player">
+        <div class="player-toggle" role="group" aria-label="Player toggle">
+          <button class="pill active" id="plAbd">Abdullah</button>
+          <button class="pill" id="plEsha">Esha</button>
+        </div>
+
+      </div>
+      <div class="scores">
+        <div class="score-card">
+          <div class="small">Abdullah</div>
+          <div id="scoreA" style="font-weight:800">0</div>
+        </div>
+        <div class="score-card">
+          <div class="small">Esha</div>
+          <div id="scoreB" style="font-weight:800">0</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="card swipe-area" id="swipeArea">
+      <div class="day-row">
+        <div class="day-indicator">
+          <div class="day-number" id="dayLabel">Day 1</div>
+          <div class="small" id="dateLabel"></div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress" aria-hidden="true">
+            <!-- svg ring will be injected -->
+            <svg id="ring" width="84" height="84" viewBox="0 0 36 36"></svg>
+          </div>
+          <div style="text-align:right">
+            <div class="small">Day total</div>
+            <div id="dayTotal" style="font-weight:800;font-size:18px">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav" style="margin-bottom:8px">
+        <button class="btn" id="prevBtn" aria-label="Previous day">◀</button>
+        <button class="btn" id="nextBtn" aria-label="Next day">▶</button>
+        <div style="flex:1"></div>
+      </div>
+
+      <div class="tasks" id="tasksList" role="list"></div>
+
+      <div class="footer-actions">
+        <button class="btn" id="resetBtn">Reset</button>
+
+      </div>
+
+    </main>
+
+    <footer style="margin-top:10px;color:var(--muted);font-size:12px">Our love will make us perfect</footer>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // Configuration — change these at top for quick customization
+    const TASKS = [
+      { name: 'Healthy Diet', pts: 15 },
+      { name: 'Proper Sleep', pts: 15 },
+      { name: 'Natural Skincare', pts: 10 },
+      { name: 'Hydration', pts: 10 },
+      { name: 'Exercise', pts: 20 },
+      { name: 'Facial Focus', pts: 15 },
+      { name: 'Sun Protection', pts: 10 },
+      { name: 'Meditation / Music', pts: 5 }
+    ];
+    const DAYS = 30;
+    const PLAYERS = ['Abdullah', 'Esha'];
+    const STORAGE_KEY = '30day_skin_mobile_v1';
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDJQ_shUuJs52HvJPmc5JNQrcmq75pDz0w",
+      authDomain: "yaromeha.firebaseapp.com",
+      projectId: "yaromeha",
+      storageBucket: "yaromeha.firebasestorage.app",
+      messagingSenderId: "506303301079",
+      appId: "1:506303301079:web:f7965f95a1b9cf5c3af792",
+      measurementId: "G-W3TS8L4V8L"
+    };
+
+    // state structure: {player:{'<day>_<rule>':'blank'|'tick'|'cross'}}
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (!state[PLAYERS[0]]) state[PLAYERS[0]] = {};
+    if (!state[PLAYERS[1]]) state[PLAYERS[1]] = {};
+
+    // Firebase
+    let app = null; let db = null; let auth = null; let unsub = null; let isApplyingRemote = false;
+    function initFirebase() {
+      try {
+        app = firebase.initializeApp(FIREBASE_CONFIG);
+        db = firebase.firestore();
+        auth = firebase.auth();
+        auth.onAuthStateChanged(user => {
+          if (user) {
+            startRealtime();
+          }
+        });
+        auth.signInAnonymously().catch(err => { console.warn('Anon sign-in failed', err); });
+      } catch (err) { console.warn('Firebase init failed, continuing local-only', err); }
+    }
+
+    function docRef() { if (!db) return null; return db.collection('skinChallenge').doc('shared'); }
+
+    function startRealtime() {
+      if (!db) return;
+      if (unsub) unsub();
+      unsub = docRef().onSnapshot(snap => {
+        if (!snap.exists) { return; }
+        const remote = snap.data() && snap.data().state;
+        if (!remote) return;
+        // avoid loop: set flag while applying
+        isApplyingRemote = true;
+        state = remote;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        updateView();
+        recalcTotals();
+        isApplyingRemote = false;
+      }, err => { console.warn('Realtime error', err); });
+    }
+
+    async function saveRemote() {
+      if (!db || isApplyingRemote || !auth || !auth.currentUser) return;
+      try {
+        await docRef().set({ state }, { merge: true });
+      } catch (err) { console.warn('Save remote failed', err); }
+    }
+
+    // DOM refs
+    const plAbd = document.getElementById('plAbd');
+    const plEsha = document.getElementById('plEsha');
+    const dayLabel = document.getElementById('dayLabel');
+    const dateLabel = document.getElementById('dateLabel');
+    const tasksList = document.getElementById('tasksList');
+    const dayTotalEl = document.getElementById('dayTotal');
+    const scoreA = document.getElementById('scoreA');
+    const scoreB = document.getElementById('scoreB');
+    const ringEl = document.getElementById('ring');
+
+    // current view
+    let currentDay = 1;
+    let currentPlayer = PLAYERS[0];
+
+    // Helpers
+    function getSelectedPlayer() { return currentPlayer; }
+
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); saveRemote(); }
+
+    // Render ring (SVG circle progress) — percent 0..100
+    function renderRing(percent) {
+      const r = 16; const c = 2 * Math.PI * r; // circumference
+      const dash = (percent / 100) * c;
+      ringEl.innerHTML = `
+        <circle r="${r}" cx="18" cy="18" fill="transparent" stroke="rgba(255,255,255,0.03)" stroke-width="4"></circle>
+        <circle r="${r}" cx="18" cy="18" fill="transparent" stroke="${getRingColor(percent)}" stroke-width="4" stroke-dasharray="${dash} ${c - dash}" stroke-linecap="round"></circle>
+        <text x="18" y="21" font-size="6" text-anchor="middle" fill="white" style="font-weight:800">${Math.round(percent)}%</text>
+      `;
+    }
+
+    function getRingColor(p) { if (p >= 90) return 'var(--good)'; if (p >= 60) return 'var(--accent)'; return '#9aa4b2'; }
+
+    // Render task list for currentDay + selected player
+    function renderTasks() {
+      tasksList.innerHTML = '';
+      const p = getSelectedPlayer();
+      let dayTotal = 0; let completed = 0;
+      TASKS.forEach((t, idx) => {
+        const key = currentDay + '_' + idx;
+        const s = (state[p] && state[p][key]) || 'blank';
+        if (s === 'tick') { dayTotal += t.pts; completed++; }
+
+        const task = document.createElement('div'); task.className = 'task'; task.setAttribute('role', 'listitem');
+        const left = document.createElement('div'); left.className = 'left';
+        const name = document.createElement('div'); name.className = 'name'; name.innerText = t.name;
+        const meta = document.createElement('div'); meta.className = 'meta'; meta.innerText = t.pts + ' pts';
+        left.appendChild(name); left.appendChild(meta);
+
+        const btn = document.createElement('button'); btn.className = 'toggle ' + s; btn.dataset.rule = idx; btn.dataset.state = s; btn.setAttribute('aria-pressed', s === 'tick');
+        btn.innerText = (s === 'tick' ? '✓' : (s === 'cross' ? '✕' : ''));
+        btn.addEventListener('click', onToggle);
+
+        task.appendChild(left); task.appendChild(btn);
+        tasksList.appendChild(task);
+      });
+
+      // update totals and ring
+      dayTotalEl.innerText = dayTotal;
+      const percent = (completed / TASKS.length) * 100;
+      renderRing(percent);
+      recalcTotals();
+    }
+
+    // toggle handler: cycle blank -> tick -> cross -> blank
+    function onToggle(e) {
+      const btn = e.currentTarget; const rule = btn.dataset.rule; const p = getSelectedPlayer();
+      const key = currentDay + '_' + rule; const curr = btn.dataset.state || 'blank';
+      const next = curr === 'blank' ? 'tick' : (curr === 'tick' ? 'cross' : 'blank');
+      if (!state[p]) state[p] = {};
+      state[p][key] = next;
+      // apply
+      btn.dataset.state = next; btn.classList.remove('blank', 'tick', 'cross'); btn.classList.add(next);
+      btn.innerText = (next === 'tick' ? '✓' : (next === 'cross' ? '✕' : ''));
+      btn.setAttribute('aria-pressed', next === 'tick');
+      // recalc
+      renderTasks();
+      saveState();
+    }
+
+    // recalc total scores for both players across all days
+    function recalcTotals() {
+      PLAYERS.forEach(pl => {
+        let total = 0;
+        for (let d = 1; d <= DAYS; d++) {
+          for (let r = 0; r < TASKS.length; r++) {
+            const key = d + '_' + r;
+            if (state[pl] && state[pl][key] === 'tick') total += TASKS[r].pts;
+          }
+        }
+        if (pl === PLAYERS[0]) scoreA.innerText = total; else scoreB.innerText = total;
+      });
+    }
+
+    // navigation
+    document.getElementById('prevBtn').addEventListener('click', () => { if (currentDay > 1) { currentDay--; updateView(); } });
+    document.getElementById('nextBtn').addEventListener('click', () => { if (currentDay < DAYS) { currentDay++; updateView(); } });
+
+    // player toggle handlers
+    function setPlayer(p) {
+      currentPlayer = p;
+      plAbd.classList.toggle('active', p === PLAYERS[0]);
+      plEsha.classList.toggle('active', p === PLAYERS[1]);
+      renderTasks();
+    }
+    plAbd.addEventListener('click', () => setPlayer(PLAYERS[0]));
+    plEsha.addEventListener('click', () => setPlayer(PLAYERS[1]));
+
+    // reset
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (confirm('Reset all progress for both players?')) { state = {}; PLAYERS.forEach(p => state[p] = {}); saveState(); updateView(); }
+    });
+
+    // update view (labels + tasks)
+    function updateView() {
+      dayLabel.innerText = 'Day ' + currentDay;
+      const today = new Date();
+      const d = new Date(); d.setDate(today.getDate() + (currentDay - 1));
+      dateLabel.innerText = d.toLocaleDateString();
+      renderTasks();
+    }
+
+    // Swipe handling for mobile (left/right to change day)
+    (function addSwipe() {
+      const el = document.getElementById('swipeArea');
+      let startX = null; let startY = null;
+      el.addEventListener('touchstart', e => { const t = e.touches[0]; startX = t.clientX; startY = t.clientY; });
+      el.addEventListener('touchmove', e => { /* prevent accidental horizontal scroll? we allow pan-y */ });
+      el.addEventListener('touchend', e => {
+        if (startX === null) return; const t = (e.changedTouches && e.changedTouches[0]); if (!t) return;
+        const dx = t.clientX - startX; const dy = t.clientY - startY;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+          if (dx < 0 && currentDay < DAYS) { currentDay++; updateView(); }
+          else if (dx > 0 && currentDay > 1) { currentDay--; updateView(); }
+        }
+        startX = null; startY = null;
+      });
+    })();
+
+    // keyboard support for desktop testing
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') { if (currentDay < DAYS) { currentDay++; updateView(); } }
+      if (e.key === 'ArrowLeft') { if (currentDay > 1) { currentDay--; updateView(); } }
+    });
+
+    // initialize
+    initFirebase();
+    setPlayer(currentPlayer);
+    updateView();
+    recalcTotals();
+  </script>
+</body>
+
+</html>
