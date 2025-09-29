@@ -284,11 +284,102 @@
       margin-top: 10px
     }
 
+    .header-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      align-items: center;
+      justify-content: center
+    }
+
+    /* Center and distribute header items nicely */
+    .scores {
+      width: 100%;
+      justify-content: space-evenly
+    }
+
+    .topbar {
+      justify-content: center
+    }
+
+    /* Improved player toggle */
+    .player-toggle {
+      position: relative;
+      padding: 6px;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.10)
+    }
+
+    .player-toggle .toggle-indicator {
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      left: 6px;
+      width: calc(50% - 0px);
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 6px 18px rgba(255, 209, 102, 0.25);
+      transform: translateX(0%);
+      transition: transform .22s ease;
+      z-index: 0
+    }
+
+    .player-toggle.second-active .toggle-indicator {
+      transform: translateX(100%)
+    }
+
+    .player-toggle .pill {
+      position: relative;
+      z-index: 1;
+      min-width: 120px;
+      height: 40px;
+      padding: 0 12px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      color: #e6eef8;
+      transition: color .2s ease
+    }
+
+    .player-toggle .pill.active { color: #0b1020 }
+
     .score-card {
-      background: transparent;
-      padding: 8px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.08)
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 120px;
+      flex: 1;
+      transition: transform .12s ease, border-color .2s ease, background-color .2s ease
+    }
+
+    .score-card:hover { transform: translateY(-1px) }
+
+    .score-card .small {
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .score-value {
+      font-weight: 900;
+      font-size: 22px;
+      line-height: 1.1
+    }
+
+    .score-card.leader {
+      border-color: rgba(255, 209, 102, 0.38);
+      background: linear-gradient(180deg, rgba(255, 209, 102, 0.10), rgba(255,255,255,0.02))
+    }
+
+    .score-card.tie {
+      border-color: rgba(255, 255, 255, 0.12)
     }
 
     /* big mobile-friendly touch area for previous/next swipes */
@@ -315,24 +406,27 @@
 <body>
   <div class="wrap">
     <header>
-
+    <div class="header-container">
+      <div class="scores">
+        <div class="score-card" id="cardA">
+          <div class="small">Abdullah</div>
+          <div id="scoreA" class="score-value">0</div>
+        </div>
+        <div class="score-card" id="cardB">
+          <div class="small">Esha</div>
+          <div id="scoreB" class="score-value">0</div>
+        </div>
+      </div>
       <div class="topbar" aria-label="Choose player">
-        <div class="player-toggle" role="group" aria-label="Player toggle">
+        <div class="player-toggle" id="playerToggle" role="group" aria-label="Player toggle">
+          <div class="toggle-indicator" aria-hidden="true"></div>
           <button class="pill active" id="plAbd">Abdullah</button>
           <button class="pill" id="plEsha">Esha</button>
         </div>
 
       </div>
-      <div class="scores">
-        <div class="score-card">
-          <div class="small">Abdullah</div>
-          <div id="scoreA" style="font-weight:800">0</div>
-        </div>
-        <div class="score-card">
-          <div class="small">Esha</div>
-          <div id="scoreB" style="font-weight:800">0</div>
-        </div>
-      </div>
+     </div>
+    
     </header>
 
     <main class="card swipe-area" id="swipeArea">
@@ -452,12 +546,15 @@
     // DOM refs
     const plAbd = document.getElementById('plAbd');
     const plEsha = document.getElementById('plEsha');
+    const playerToggle = document.getElementById('playerToggle');
     const dayLabel = document.getElementById('dayLabel');
     const dateLabel = document.getElementById('dateLabel');
     const tasksList = document.getElementById('tasksList');
     const dayTotalEl = document.getElementById('dayTotal');
     const scoreA = document.getElementById('scoreA');
     const scoreB = document.getElementById('scoreB');
+    const cardA = document.getElementById('cardA');
+    const cardB = document.getElementById('cardB');
     const ringEl = document.getElementById('ring');
 
     // current view
@@ -541,6 +638,20 @@
         }
         if (pl === PLAYERS[0]) scoreA.innerText = total; else scoreB.innerText = total;
       });
+
+      // highlight leader or tie
+      const a = parseInt(scoreA.innerText || '0', 10);
+      const b = parseInt(scoreB.innerText || '0', 10);
+      cardA.classList.remove('leader', 'tie');
+      cardB.classList.remove('leader', 'tie');
+      if (a > b) {
+        cardA.classList.add('leader');
+      } else if (b > a) {
+        cardB.classList.add('leader');
+      } else {
+        cardA.classList.add('tie');
+        cardB.classList.add('tie');
+      }
     }
 
     // navigation
@@ -552,6 +663,9 @@
       currentPlayer = p;
       plAbd.classList.toggle('active', p === PLAYERS[0]);
       plEsha.classList.toggle('active', p === PLAYERS[1]);
+      playerToggle.classList.toggle('second-active', p === PLAYERS[1]);
+      plAbd.setAttribute('aria-pressed', p === PLAYERS[0]);
+      plEsha.setAttribute('aria-pressed', p === PLAYERS[1]);
       renderTasks();
     }
     plAbd.addEventListener('click', () => setPlayer(PLAYERS[0]));
