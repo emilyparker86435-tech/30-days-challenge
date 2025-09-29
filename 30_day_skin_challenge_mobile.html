@@ -29,6 +29,10 @@
       -webkit-font-smoothing: antialiased
     }
 
+    /* Ensure consistent background at page edges on mobile */
+    html { background: #071830 }
+    body { min-height: 100svh }
+
     .wrap {
       max-width: 520px;
       margin: 18px auto;
@@ -309,7 +313,9 @@
       padding: 6px;
       gap: 6px;
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.10)
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      overflow: hidden;
+      border-radius: 999px
     }
 
     .player-toggle .toggle-indicator {
@@ -317,17 +323,17 @@
       top: 6px;
       bottom: 6px;
       left: 6px;
-      width: calc(50% - 0px);
+      right: calc(50% + 6px);
       border-radius: 999px;
       background: var(--accent);
       box-shadow: 0 6px 18px rgba(255, 209, 102, 0.25);
-      transform: translateX(0%);
-      transition: transform .22s ease;
+      transition: left .22s ease, right .22s ease;
       z-index: 0
     }
 
     .player-toggle.second-active .toggle-indicator {
-      transform: translateX(100%)
+      left: calc(50% + 6px);
+      right: 6px
     }
 
     .player-toggle .pill {
@@ -476,12 +482,12 @@
     const TASKS = [
       { name: 'Healthy Diet', pts: 15 },
       { name: 'Proper Sleep', pts: 15 },
-      { name: 'Natural Skincare', pts: 10 },
+      { name: 'Skincare', pts: 10 },
       { name: 'Hydration', pts: 10 },
       { name: 'Exercise', pts: 20 },
       { name: 'Facial Focus', pts: 15 },
-      { name: 'Sun Protection', pts: 10 },
-      { name: 'Meditation / Music', pts: 5 }
+      { name: 'Sun Protection', pts: 5 },
+      { name: 'Meditation/Music', pts: 10 }
     ];
     const DAYS = 30;
     const PLAYERS = ['Abdullah', 'Esha'];
