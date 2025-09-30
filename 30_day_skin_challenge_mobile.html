@@ -489,9 +489,10 @@
       { name: 'Avoid Junk', pts: 15 },
       { name: 'Meditation/Music', pts: 10 }
     ];
-    const DAYS = 30;
+    // Unlimited days: no fixed DAYS cap
     const PLAYERS = ['Abdullah', 'Esha'];
     const STORAGE_KEY = '30day_skin_mobile_v1';
+    const START_DATE = new Date(2025, 8, 30); // Month is 0-indexed: 8 = September
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyDJQ_shUuJs52HvJPmc5JNQrcmq75pDz0w",
       authDomain: "yaromeha.firebaseapp.com",
@@ -564,7 +565,19 @@
     const ringEl = document.getElementById('ring');
 
     // current view
-    let currentDay = 2;
+    function calculateCurrentDay() {
+      const today = new Date();
+      const start = new Date(START_DATE);
+      today.setHours(0,0,0,0);
+      start.setHours(0,0,0,0);
+      const diffMs = today - start;
+      const diffDays = Math.floor(diffMs / 86400000);
+      const day = diffDays + 1; // Day 1 is the start date
+      if (day < 1) return 1;
+      return day;
+    }
+
+    let currentDay = calculateCurrentDay();
     let currentPlayer = PLAYERS[0];
 
     // Helpers
@@ -634,9 +647,19 @@
 
     // recalc total scores for both players across all days
     function recalcTotals() {
+      // Determine max day present in state or current day
+      let maxDay = currentDay;
+      PLAYERS.forEach(pl => {
+        const bucket = state[pl] || {};
+        Object.keys(bucket).forEach(k => {
+          const di = parseInt(String(k).split('_')[0], 10);
+          if (!isNaN(di) && di > maxDay) maxDay = di;
+        });
+      });
+
       PLAYERS.forEach(pl => {
         let total = 0;
-        for (let d = 1; d <= DAYS; d++) {
+        for (let d = 1; d <= maxDay; d++) {
           for (let r = 0; r < TASKS.length; r++) {
             const key = d + '_' + r;
             if (state[pl] && state[pl][key] === 'tick') total += TASKS[r].pts;
@@ -662,7 +685,7 @@
 
     // navigation
     document.getElementById('prevBtn').addEventListener('click', () => { if (currentDay > 1) { currentDay--; updateView(); } });
-    document.getElementById('nextBtn').addEventListener('click', () => { if (currentDay < DAYS) { currentDay++; updateView(); } });
+    document.getElementById('nextBtn').addEventListener('click', () => { currentDay++; updateView(); });
 
     // player toggle handlers
     function setPlayer(p) {
@@ -685,8 +708,8 @@
     // update view (labels + tasks)
     function updateView() {
       dayLabel.innerText = 'Day ' + currentDay;
-      const today = new Date();
-      const d = new Date(); d.setDate(today.getDate() + (currentDay - 1));
+      const d = new Date(START_DATE);
+      d.setDate(START_DATE.getDate() + (currentDay - 1));
       dateLabel.innerText = d.toLocaleDateString();
       renderTasks();
     }
@@ -701,7 +724,7 @@
         if (startX === null) return; const t = (e.changedTouches && e.changedTouches[0]); if (!t) return;
         const dx = t.clientX - startX; const dy = t.clientY - startY;
         if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-          if (dx < 0 && currentDay < DAYS) { currentDay++; updateView(); }
+          if (dx < 0) { currentDay++; updateView(); }
           else if (dx > 0 && currentDay > 1) { currentDay--; updateView(); }
         }
         startX = null; startY = null;
@@ -710,7 +733,7 @@
 
     // keyboard support for desktop testing
     window.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight') { if (currentDay < DAYS) { currentDay++; updateView(); } }
+      if (e.key === 'ArrowRight') { currentDay++; updateView(); }
       if (e.key === 'ArrowLeft') { if (currentDay > 1) { currentDay--; updateView(); } }
     });
 
